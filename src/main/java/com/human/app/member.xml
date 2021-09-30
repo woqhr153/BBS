@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.human.app.Member">
+	<insert id="doSignin">
+		insert into bbs_member values(#{param1},#{param2},#{param3},#{param4})
+	</insert>
+	<select id="doLogin" resultType="int">
+		select count(*) from bbs_member where login_id=#{param1} and passcode=#{param2}
+	</select>
+</mapper>
