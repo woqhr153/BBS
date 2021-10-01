@@ -41,9 +41,11 @@ public class HomeController {
 		return "home";
 	}
 	@RequestMapping(value = "/view", method = RequestMethod.GET)
-	public String view(@RequestParam("bbs_id") int bbs_id,Model model) {
-		model.addAttribute("bbs_id", bbs_id);
-		
+	public String view(@RequestParam("bbs_id") int bbs_id,HttpServletRequest hsr,Model model) {
+		//model.addAttribute("bbs_id", bbs_id);
+		Board board = sqlSession.getMapper(Board.class);
+		Boardinfo boardinfo = board.getBoardView(bbs_id);
+		model.addAttribute("board", boardinfo);
 		return "view";
 	}
 	@RequestMapping(value = "write", method = RequestMethod.GET)
@@ -51,6 +53,14 @@ public class HomeController {
 		
 		
 		return "write";
+	}
+	@RequestMapping(value = "update", method = RequestMethod.GET)
+	public String update(@RequestParam("bbs_id") int bbs_id,Model model) {
+		//model.addAttribute("bbs_id", bbs_id);
+		Board board = sqlSession.getMapper(Board.class);
+		Boardinfo boardinfo = board.getBoardView(bbs_id);
+		model.addAttribute("board", boardinfo);
+		return "update";
 	}
 	@RequestMapping(value = "newbie", method = RequestMethod.GET)
 	public String newbie() {
@@ -63,7 +73,7 @@ public class HomeController {
 		session = hsr.getSession();
 		session.invalidate();
 		
-		return "home";
+		return "redirect:/";
 	}
 	@RequestMapping(value = "login", method = RequestMethod.GET)
 	public String login(HttpServletRequest hsr) {
@@ -86,15 +96,17 @@ public class HomeController {
 		
 		for(int i=0; i<boardinfo.size(); i++) {
 			JSONObject jo = new JSONObject();
+			
 			jo.put("bbs_id", boardinfo.get(i).getBbs_id());
 			jo.put("title", boardinfo.get(i).getTitle());
 			jo.put("content", boardinfo.get(i).getContent());
 			jo.put("writer", boardinfo.get(i).getWriter());
-			jo.put("passcode", boardinfo.get(i).getPasscode());
 			jo.put("created", boardinfo.get(i).getCreated());
 			jo.put("updated", boardinfo.get(i).getUpdated());
 			ja.add(jo);
+			
 		}
+
 		return ja.toString();
 	}
 	
@@ -104,21 +116,11 @@ public class HomeController {
 	public String getRoomView(HttpServletRequest hsr) {
 		Board board = sqlSession.getMapper(Board.class);
 		int bbs_id = Integer.parseInt(hsr.getParameter("bbs_id"));
-		ArrayList<Boardinfo> boardinfo = board.getBoardView(bbs_id);
+		Boardinfo boardinfo = board.getBoardView(bbs_id);
 		
 		JSONArray ja = new JSONArray();
 		
-		for(int i=0; i<boardinfo.size(); i++) {
-			JSONObject jo = new JSONObject();
-			jo.put("bbs_id", boardinfo.get(i).getBbs_id());
-			jo.put("title", boardinfo.get(i).getTitle());
-			jo.put("content", boardinfo.get(i).getContent());
-			jo.put("writer", boardinfo.get(i).getWriter());
-			jo.put("passcode", boardinfo.get(i).getPasscode());
-			jo.put("created", boardinfo.get(i).getCreated());
-			jo.put("updated", boardinfo.get(i).getUpdated());
-			ja.add(jo);
-		}
+		
 		return ja.toString();
 	}
 	@RequestMapping(value="/check_user",method= RequestMethod.POST)
@@ -137,7 +139,7 @@ public class HomeController {
 			return "redirect:"+referer;
 		}
 		session = hsr.getSession();
-		session.setAttribute("nonmember", "ì•„ì´ë”” ë˜ëŠ” ë¹„ë°€ë²ˆí˜¸ë¥¼ í™•ì¸í•´ì£¼ì„¸ìš”.");
+		session.setAttribute("nonmember", "¾ÆÀÌµð¿Í ºñ¹Ð¹øÈ£¸¦ È®ÀÎÇØÁÖ¼¼¿ä.");
 		return "login";
 	}
 	@RequestMapping(value="/signin", method=RequestMethod.POST)
@@ -148,6 +150,34 @@ public class HomeController {
 		String mobile = hsr.getParameter("tel");
 		Member member = sqlSession.getMapper(Member.class);
 		member.doSignin(name, loginid, passcode ,mobile);	
+		return "home";
+	}
+	
+	@RequestMapping(value="/doWrite", method=RequestMethod.POST)
+	public  String doWrite(HttpServletRequest hsr) {
+		
+		String name = (String)session.getAttribute("loginid");
+		String content = hsr.getParameter("content");
+		String title = hsr.getParameter("title");
+		Board board = sqlSession.getMapper(Board.class);
+		board.doWrite(title,content,name);
+		return "home";
+	}
+	@RequestMapping(value="/doUpdate", method=RequestMethod.POST)
+	public  String doUpdate(HttpServletRequest hsr) {
+		int bbs_id = Integer.parseInt(hsr.getParameter("bbs_id"));
+		String content = hsr.getParameter("content");
+		String title = hsr.getParameter("title");
+		Board board = sqlSession.getMapper(Board.class);
+		board.doUpdate(bbs_id,title,content);
+		return "home";
+	}
+	@RequestMapping(value="/doDelete", method=RequestMethod.POST)
+	public  String doDelete(HttpServletRequest hsr) {
+		int bbs_id = Integer.parseInt(hsr.getParameter("bbs_id"));
+		
+		Board board = sqlSession.getMapper(Board.class);
+		board.doDelete(bbs_id);
 		return "home";
 	}
 /*iRoom room = sqlSession.getMapper(iRoom.class);

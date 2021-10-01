@@ -4,9 +4,18 @@
 
 <mapper namespace="com.human.app.Board">
 	<select id="getBoardList" resultType="com.human.app.Boardinfo">
-		select * from bbs
+		select * from bbs order by bbs_id desc
 	</select>
 	<select id="getBoardView" resultType="com.human.app.Boardinfo">
 		select * from bbs where bbs_id = #{param1}
 	</select>
+	<insert id="doWrite">
+		insert into bbs(bbs_id,title,content,writer,created,updated) values(seq_bbs_id.nextval,#{param1},#{param2},#{param3},to_char(sysdate,'YYYY-MM-DD'),to_char(sysdate,'YYYY-MM-DD'))
+	</insert>
+	<update id="doUpdate">
+		update bbs set title=#{param2} , content=#{param3} where bbs_id=#{param1}
+	</update>
+	<delete id="doDelete">
+		delete bbs where bbs_id=#{param1}
+	</delete>
 </mapper>

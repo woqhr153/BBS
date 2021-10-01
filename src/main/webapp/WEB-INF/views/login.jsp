@@ -31,7 +31,7 @@
           <div class="navbar-form navbar-right">
           <%
           	if(session.getAttribute("loginid") ==null) {%>
-          		<a href="/app/login" class="btn btn-success">로그인</a>
+          		<a class="btn btn-success">로그인</a>
             	<a href="/app/newbie" class="btn btn-primary">회원가입</a>
           <%
           	} else{
@@ -81,7 +81,10 @@
 	<script>	
 		$(document)
 		.on('click','#login',function() {
-			
+			let pstr= $.trim($('input[name=user_id]').val())
+			$('input[name=user_id]').val(pstr)
+			pstr= $.trim($('input[name=pw]').val())
+			$('input[name=pw]').val(pstr)
 			if($('#user_id').val()=='') {
 				alert('아이디를 입력해주세요')
 				return false

@@ -66,12 +66,13 @@
 				<tbody>
 					<tr>
 						<td>
-							<form method=POST action="/app/doWrite">
+							<form method=POST action="/app/doUpdate">
 								<div class="form-group">
-							    <input type="text" name="title" class="form-control"placeholder="제목을 입력하세요">
+							    <input type="text" id="title" name="title" class="form-control"placeholder="제목을 입력하세요" value="${board.title}">
+							    
 							  	</div>
 						  		<div class="form-group">
-							    <textarea class="form-control" name="content" rows="15" cols="20" wrap="hard" placeholder="내용을 입력하세요"></textarea>
+							    <textarea class="form-control" id="content" name="content" rows="15" cols="20" wrap="hard" placeholder="내용을 입력하세요">${board.content}</textarea>
 							  	</div>
 						  	</form>
 					  	</td>
@@ -79,29 +80,38 @@
 					
 				</tbody>
 			</table>			
-			<a href="/app" class="btn btn-primary pull-right" >목록</a>
-			<input type="button" id="write" class="btn btn-primary pull-right" value="등록" style="margin-right:10px">			
+			<input type="button" id="cancle" class="btn btn-primary pull-right" value="취소">
+			<input type="button" id="update" class="btn btn-primary pull-right" value="수정" style="margin-right:10px">			
 		</div>
 	</div>
 	<script src='https://code.jquery.com/jquery-3.5.0.js'></script>
 	<script>
 		$(document)
-		.on('click','#write',function() {
-			let pstr= $.trim($('input[name=title]').val())
-			$('input[name=title]').val(pstr)
-			pstr= $.trim($('textarea[name=content]').val())
-			$('textarea[name=content]').val(pstr)
+
+		.on('click','#cancle',function() {
+			location.href='/app/view?bbs_id='+${board.bbs_id}
+		})
+		.on('click','#update',function() {
+			let pstr= $.trim($('#title').val())
+			$('#title').val(pstr)
+			pstr= $.trim($('#content').val())
+			$('#content').val(pstr)
 			
-			if($('input[name=title]').val()==''){
+			if($('#title').val()==''){
 				alert('제목을 입력해주세요')
 				return false
 			} 
-			if($('input[name=title]').val()==''){
+			if($('#content').val()==''){
 				alert('내용을 입력해주세요')
 				return false
 			}
-			$('form').submit()
-		})
+			$.post("http://localhost:8081/app/doUpdate",{bbs_id:${board.bbs_id},title:$('#title').val(),content:$('#content').val()},function(result){
+	 			console.log(result)
+	 			
+	 			},'json')
+	 			location.href='/app/view?bbs_id='+${board.bbs_id}
+			})
+		
 	</script>
 </body>
 </html>

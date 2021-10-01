@@ -57,7 +57,7 @@
     </div>
     <div class="container">
 		<div class="row">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+			<table class="table table-striped" style="height:auto;text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
 						<th colspan="3" style="background-color: #eeeeee; text-align: center;">상세보기</th>						
@@ -66,41 +66,77 @@
 				<tbody>
 					<tr>
 						<td style="width: 20%;">글제목</td>
-						<td colspan="2" id="title"></td>
+						<td colspan="2" id="title">${board.title}</td>
 					</tr>
 					<tr>
 						<td>작성자</td>
-						<td colspan="2" id="writer"></td>
+						<td colspan="2" id="writer">${board.writer}</td>
 					</tr>
 					<tr>
 						<td>작성일자</td>
-						<td colspan="2" id="created"></td>
+						<td colspan="2" id="created">${board.created}</td>
 					</tr>
-					<tr style="">
+					
+					<tr>
 						<td>내용</td>
-						<td style=" min-height:300px; text-align: left;" id="content"></td>
+						<td style="white-space:pre-line;height:335px;text-align: left;" id="content">${board.content}</td>
 					</tr>
+					
 				</tbody>
 			</table>
-			<a href="/app" class="btn btn-primary">목록</a>
+
+
+			<a href="/app" class="btn btn-primary pull-right">목록</a>
 			
-		</div>
+          	 <%
+          	if(session.getAttribute("loginid") !=null) {%>
+          		<input type="button" id="delete" class="btn btn-primary pull-right" value="삭제" style="margin-right:10px">
+				<input type="button" id="update"  class="btn btn-primary pull-right" value="수정" style="margin-right:10px">
+	          <%
+	          	}
+         	 %>
+			</div>
 	</div>
 <script src='https://code.jquery.com/jquery-3.5.0.js'></script>
 <script>
 	$(document)
-	.ready(function() {
-		$.post("http://localhost:8080/app/getBoardView",{bbs_id:${bbs_id}},function(result){
+	/* .ready(function() {
+		$.post("http://localhost:8081/app/getBoardView",{bbs_id:${bbs_id}},function(result){
  			console.log(result)
  			$.each(result,function(ndx,value){
  				$('#title').text(value['title']);
  				$('#writer').text(value['writer']);
  				$('#content').text(value['content']);
  				$('#created').text(value['created']);
+ 				
+ 				
  			}) 
  			
  		},'json')
+	}) */
+	.on('click','#update',function() {
+		if('${loginid}' =='${board.writer}') {
+			location.href='/app/update?bbs_id='+${board.bbs_id}
+		} else {
+			alert('작성자가 아닙니다')
+			return false
+		}
+		
 	})
+	.on('click','#delete',function() {
+		if('${loginid}'=='${board.writer}'){
+			$.post("http://localhost:8081/app/doDelete",{bbs_id:${board.bbs_id}},function(result){
+	 			console.log(result)			
+	 			
+	 		},'json')
+			location.href='/app'
+		} else {
+			alert('작성자가 아닙니다')
+		}
+		
+	})
+	
+
 </script>
 </body>
 </html>

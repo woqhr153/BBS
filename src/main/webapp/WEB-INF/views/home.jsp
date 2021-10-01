@@ -71,13 +71,19 @@
 					
 				</tbody>
 			</table>
-			<a href="/app/write" class="btn btn-primary pull-right">글쓰기</a>
+			<%
+          	if(session.getAttribute("loginid") !=null) {%>
+          		<a href="/app/write" class="btn btn-primary pull-right">글쓰기</a>
+	        <%
+	          	} 
+	        %>
+
 		</div>
 	</div>
 	<script src='https://code.jquery.com/jquery-3.5.0.js'></script>
 	<script>
 		$(document).ready(function () {
-	 		$.post("http://localhost:8080/app/getBoardList",{},function(result){
+	 		$.post("http://localhost:8081/app/getBoardList",{},function(result){
 	 			console.log(result)
 	 			 $.each(result,function(ndx,value){
 	 				str='<tr><td>'+value['bbs_id']+'</td><td>'+value['title']+'</td><td>'+value['writer']+'</td><td>'+value['created']+'</td><td>'+value['updated']+'</td></tr>';
@@ -103,6 +109,7 @@
 	 			$("form").submit()
 	 		}
 	 	})
+	 	
 	</script>
 </body>
 </html>

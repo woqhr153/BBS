@@ -5,17 +5,15 @@ public class Boardinfo {
 	private String title;
 	private String content;
 	private String writer;
-	private String passcode;
 	private String created;
 	private String updated;
 	public Boardinfo() {}
-	public Boardinfo(int bbs_id, String title, String content, String writer, String passcode, String created,
+	public Boardinfo(int bbs_id, String title, String content, String writer, String created,
 			String updated) {
 		this.bbs_id = bbs_id;
 		this.title = title;
 		this.content = content;
 		this.writer = writer;
-		this.passcode = passcode;
 		this.created = created;
 		this.updated = updated;
 	}
@@ -43,12 +41,7 @@ public class Boardinfo {
 	public void setWriter(String writer) {
 		this.writer = writer;
 	}
-	public String getPasscode() {
-		return passcode;
-	}
-	public void setPasscode(String passcode) {
-		this.passcode = passcode;
-	}
+
 	public String getCreated() {
 		return created;
 	}
