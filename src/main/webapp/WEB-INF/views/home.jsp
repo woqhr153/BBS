@@ -1,10 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
 <!-- 합쳐지고 최소화된 최신 CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
@@ -57,6 +59,21 @@
     </div>
     <div class="container">
 		<div class="row">
+			<form name="form_search" action="/app" method="GET" class="form-horizontal">
+                  <select name="search_type" class="form-control float-left" style="width: inherit;">
+                    <option value="all" ${paging.search_type eq 'all' ? 'selected' : ''}>전체</option>
+                    <option value="title" ${paging.search_type eq 'title' ? 'selected' : ''}>제목</option>
+                    <option value="content" ${paging.search_type eq 'content' ? 'selected' : ''}>내용</option>
+                    <option value="writer" ${paging.search_type eq 'writer' ? 'selected' : ''}>작성자</option>
+                  </select>  
+                  <input type="text" value="${paging.search_keyword}" name="search_keyword" class="form-control float-left" placeholder="Search" style="width: inherit;">
+                  <div class="input-group-append float-left" style="width: inherit;">
+                    <button type="submit" class="btn btn-default">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                  <%-- <input type="hidden" value="${pageVO.board_type}" name="board_type">   --%>                              
+                </form>
 			<table class="table table-hover" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
@@ -68,12 +85,36 @@
 					</tr>
 				</thead>
 				<tbody id="boardList">
-					
+				<c:forEach items="${viewAll}" var="list">
+				<tr>
+					<td>${list.bbs_id}</td>
+					<td>${list.title}</td>
+					<td>${list.writer}</td>
+					<td>${list.created}</td>
+					<td>${list.updated}</td>
+				</tr>
+				</c:forEach>
 				</tbody>
 			</table>
+			<c:if test="${paging.startPage != 1 }">
+				<a href="/app?nowPage=${paging.startPage - 1 }&cntPerPage=${paging.cntPerPage}&search_type=${paging.search_type}&search_keyword=${paging.search_keyword}">&lt;</a>
+			</c:if>
+			<c:forEach begin="${paging.startPage }" end="${paging.endPage }" var="p">
+				<c:choose>
+					<c:when test="${p == paging.nowPage }">
+						<b>${p }</b>
+					</c:when>
+					<c:when test="${p != paging.nowPage }">
+						<a href="/app?nowPage=${p }&cntPerPage=${paging.cntPerPage}&search_type=${paging.search_type}&search_keyword=${paging.search_keyword}">${p }</a>
+					</c:when>
+				</c:choose>
+			</c:forEach>
+			<c:if test="${paging.endPage != paging.lastPage}">
+				<a href="/app?nowPage=${paging.endPage+1 }&cntPerPage=${paging.cntPerPage}&search_type=${paging.search_type}&search_keyword=${paging.search_keyword}">&gt;</a>
+			</c:if>
 			<%
           	if(session.getAttribute("loginid") !=null) {%>
-          		<a href="/app/write" class="btn btn-primary pull-right">글쓰기</a>
+          		<a href="/app/write?nowpage=${paging.nowPage}" class="btn btn-primary pull-right">글쓰기</a>
 	        <%
 	          	} 
 	        %>
@@ -82,8 +123,9 @@
 	</div>
 	<script src='https://code.jquery.com/jquery-3.5.0.js'></script>
 	<script>
-		$(document).ready(function () {
-	 		$.post("http://localhost:8081/app/getBoardList",{},function(result){
+		$(document)
+		/* .ready(function () {
+	 		$.post("http://localhost:8080/app/getBoardList",{},function(result){
 	 			console.log(result)
 	 			 $.each(result,function(ndx,value){
 	 				str='<tr><td>'+value['bbs_id']+'</td><td>'+value['title']+'</td><td>'+value['writer']+'</td><td>'+value['created']+'</td><td>'+value['updated']+'</td></tr>';
@@ -92,7 +134,7 @@
 	 			}) 
 	 			
 	 		},'json')
-	 	})
+	 	}) */
 	 	.on('click','#boardList tr',function(){
 	 		s=$(this).find('td:eq(0)').text()
 	 		location.href='/app/view?bbs_id='+s

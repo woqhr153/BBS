@@ -3,9 +3,6 @@
 
 
 <mapper namespace="com.human.app.Board">
-	<select id="getBoardList" resultType="com.human.app.Boardinfo">
-		select * from bbs order by bbs_id desc
-	</select>
 	<select id="getBoardView" resultType="com.human.app.Boardinfo">
 		select * from bbs where bbs_id = #{param1}
 	</select>
@@ -18,4 +15,44 @@
 	<delete id="doDelete">
 		delete bbs where bbs_id=#{param1}
 	</delete>
+	<!-- 총 게시글 갯수 출력 -->
+<select id="countBoard" resultType="int">
+	SELECT COUNT(*) FROM BBS <include refid="sqlWhere" />
+</select>
+
+<!-- 페이징 처리 후 게시글 조회 -->
+<select id="selectBoard" resultType="com.human.app.Boardinfo">
+	SELECT * 
+		FROM (
+			SELECT ROWNUM RN, A.* 
+				FROM (
+						SELECT * 
+						FROM BBS
+						<include refid="sqlWhere" />
+						ORDER BY BBS_ID DESC
+						) A
+				)
+	WHERE RN BETWEEN #{start} AND #{end}
+</select>
+
+ <sql id="sqlWhere">
+	
+	<if test="search_type != '' and search_type != null">
+     	where
+    	 <if test="search_type == 'all'.toString()">
+		    title LIKE '%'||#{search_keyword}||'%'
+		    OR content LIKE '%'||#{search_keyword}||'%'
+	     </if>
+	     <if test="search_type == 'title'.toString()">
+	     	title LIKE '%'||#{search_keyword}||'%'
+	     </if>
+	     <if test="search_type == 'content'.toString()">
+	     	content LIKE '%'||#{search_keyword}||'%'
+	     </if>
+	     <if test="search_type == 'writer'.toString()">
+	     	writer LIKE '%'||#{search_keyword}||'%'
+	     </if>
+	     
+    </if>
+</sql>
 </mapper>

@@ -35,11 +35,36 @@ public class HomeController {
 	 * Simply selects the home view to render by returning its name.
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home() {
+	public String home(Paging vo, Model model, HttpServletRequest hsr
+			, @RequestParam(value="nowPage", required=false)String nowPage
+			, @RequestParam(value="cntPerPage", required=false)String cntPerPage
+			, @RequestParam(value="search_type",required = false) String search_type
+			, @RequestParam(value="search_keyword",required = false) String search_keyword) {
+			Board board = sqlSession.getMapper(Board.class);
+			
+			
+
+			int total = board.countBoard(vo);
+			
+			System.out.println(total);
+			if (nowPage == null && cntPerPage == null) {
+			nowPage = "1";
+			cntPerPage = "5";
+		} else if (nowPage == null) {
+			nowPage = "1";
+		} else if (cntPerPage == null) { 
+			cntPerPage = "5";
+		}
+		vo = new Paging(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage),search_type,search_keyword);
+		model.addAttribute("paging", vo);
+		model.addAttribute("viewAll", board.selectBoard(vo));
+		System.out.println(vo.getSearch_keyword());
+
 		
 		
 		return "home";
 	}
+
 	@RequestMapping(value = "/view", method = RequestMethod.GET)
 	public String view(@RequestParam("bbs_id") int bbs_id,HttpServletRequest hsr,Model model) {
 		//model.addAttribute("bbs_id", bbs_id);
@@ -85,30 +110,29 @@ public class HomeController {
 		
 		return "login";
 	}
-	@RequestMapping(value="/getBoardList", method= RequestMethod.POST,
-			produces = "application/text; charset=utf8")
-	@ResponseBody
-	public String getRoomList(HttpServletRequest hsr) {
-		Board board = sqlSession.getMapper(Board.class);
-		ArrayList<Boardinfo> boardinfo = board.getBoardList();
-		
-		JSONArray ja = new JSONArray();
-		
-		for(int i=0; i<boardinfo.size(); i++) {
-			JSONObject jo = new JSONObject();
-			
-			jo.put("bbs_id", boardinfo.get(i).getBbs_id());
-			jo.put("title", boardinfo.get(i).getTitle());
-			jo.put("content", boardinfo.get(i).getContent());
-			jo.put("writer", boardinfo.get(i).getWriter());
-			jo.put("created", boardinfo.get(i).getCreated());
-			jo.put("updated", boardinfo.get(i).getUpdated());
-			ja.add(jo);
-			
-		}
-
-		return ja.toString();
-	}
+	/*
+	 * @RequestMapping(value="/getBoardList", method= RequestMethod.POST, produces =
+	 * "application/text; charset=utf8")
+	 * 
+	 * @ResponseBody public String getRoomList(HttpServletRequest hsr) { Board board
+	 * = sqlSession.getMapper(Board.class); ArrayList<Boardinfo> boardinfo =
+	 * board.getBoardList();
+	 * 
+	 * JSONArray ja = new JSONArray();
+	 * 
+	 * for(int i=0; i<boardinfo.size(); i++) { JSONObject jo = new JSONObject();
+	 * 
+	 * jo.put("bbs_id", boardinfo.get(i).getBbs_id()); jo.put("title",
+	 * boardinfo.get(i).getTitle()); jo.put("content",
+	 * boardinfo.get(i).getContent()); jo.put("writer",
+	 * boardinfo.get(i).getWriter()); jo.put("created",
+	 * boardinfo.get(i).getCreated()); jo.put("updated",
+	 * boardinfo.get(i).getUpdated()); ja.add(jo);
+	 * 
+	 * }
+	 * 
+	 * return ja.toString(); }
+	 */
 	
 	@RequestMapping(value="/getBoardView", method= RequestMethod.POST,
 			produces = "application/text; charset=utf8")
@@ -139,7 +163,7 @@ public class HomeController {
 			return "redirect:"+referer;
 		}
 		session = hsr.getSession();
-		session.setAttribute("nonmember", "¾ÆÀÌµð¿Í ºñ¹Ð¹øÈ£¸¦ È®ÀÎÇØÁÖ¼¼¿ä.");
+		session.setAttribute("nonmember", "ï¿½ï¿½ï¿½Ìµï¿½ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ï¿½Ö¼ï¿½ï¿½ï¿½.");
 		return "login";
 	}
 	@RequestMapping(value="/signin", method=RequestMethod.POST)
