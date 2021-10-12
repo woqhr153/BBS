@@ -79,7 +79,7 @@
 					
 				</tbody>
 			</table>			
-			<a href="/app" class="btn btn-primary pull-right" >목록</a>
+			<a href="/app?page=${page}&search_type=${search_type}&search_keyword=${search_keyword}" class="btn btn-primary pull-right" >목록</a>
 			<input type="button" id="write" class="btn btn-primary pull-right" value="등록" style="margin-right:10px">			
 		</div>
 	</div>

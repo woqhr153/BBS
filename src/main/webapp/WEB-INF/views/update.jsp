@@ -89,7 +89,7 @@
 		$(document)
 
 		.on('click','#cancle',function() {
-			location.href='/app/view?bbs_id='+${board.bbs_id}
+			location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
 		})
 		.on('click','#update',function() {
 			let pstr= $.trim($('#title').val())
@@ -105,11 +105,11 @@
 				alert('내용을 입력해주세요')
 				return false
 			}
-			$.post("http://localhost:8081/app/doUpdate",{bbs_id:${board.bbs_id},title:$('#title').val(),content:$('#content').val()},function(result){
+			$.post("http://localhost:8080/app/doUpdate",{bbs_id:${board.bbs_id},title:$('#title').val(),content:$('#content').val()},function(result){
 	 			console.log(result)
 	 			
 	 			},'json')
-	 			location.href='/app/view?bbs_id='+${board.bbs_id}
+	 			location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
 			})
 		
 	</script>

@@ -1,10 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<script src='https://code.jquery.com/jquery-3.5.0.js'></script>
 <!-- 합쳐지고 최소화된 최신 CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
@@ -86,57 +88,158 @@
 			</table>
 
 
-			<a href="/app" class="btn btn-primary pull-right">목록</a>
+			<a href="/app?page=${page}&search_type=${search_type}&search_keyword=${search_keyword}" class="btn btn-primary pull-right">목록</a>
 			
-          	 <%
-          	if(session.getAttribute("loginid") !=null) {%>
+          	<%
+          	if(session.getAttribute("loginid") !=null) {
+          	%>
           		<input type="button" id="delete" class="btn btn-primary pull-right" value="삭제" style="margin-right:10px">
 				<input type="button" id="update"  class="btn btn-primary pull-right" value="수정" style="margin-right:10px">
-	          <%
+	         <%
 	          	}
-         	 %>
+         	 %>		
+				<div class="form-group">
+				<%
+					if(session.getAttribute("loginid") !=null) {
+				%>
+					<textarea style="margin-top:100px;" class="form-control" name="content" rows="5" cols="20" wrap="hard" placeholder="내용을 입력하세요"></textarea>
+					
+				</div>
+				<input type="button" id="doReply"  class="btn btn-primary pull-right" value="등록" >	
+				<%
+					} else {
+				%>
+					<textarea style="margin-top:100px;" class="form-control"rows="5" cols="20" wrap="hard" placeholder="댓글을 작성하시려면 로그인하세요" disabled></textarea>
+				<%
+					} 
+				%>
+
+		       	     
+		     <table class="table table-hover" style=" margin-top:70px">
+				<thead>
+					<tr>
+						<th colspan=5 style="text-align: center; background-color: #eeeeee; text-align: center; width:5%;">댓글리스트</th>
+					
+					</tr>
+				</thead>
+				<tbody id="replyList">
+				
+					<c:forEach items="${replyList}" var="list">
+						<tr>
+							<td id="${list.reply_id}">
+								<div style="font-size:18px">작성자: ${list.writer}</div>
+								<div id="content${list.reply_id}" style="padding:15px; white-space:pre-line;">${list.content}</div>
+								
+								<div class="pull-right" style="font-size:8px; color: gray">
+								<%
+									if(session.getAttribute("loginid") !=null) {
+								%>
+								<input type="button" id="update${list.reply_id}" class="btn-sm btn-link" value=수정>
+								<input type="button" id="delete${list.reply_id}" class="btn-sm btn-link" value=삭제>								
+								<%
+									}
+								%>
+									<span>등록일 ${list.created}  </span>
+									<span>  수정일 ${list.updated}</span>
+								</div>
+							</td>
+						</tr>
+						<%
+							if(session.getAttribute("loginid") !=null) {
+						%>
+							<script>
+							$(document)
+							.on('click','#update${list.reply_id}',function() {
+								if('${loginid}' =='${list.writer}') {
+									str = '<textarea id="text${list.reply_id}" class="form-control" rows="5" cols="20" placeholder="내용을 입력해주세요"></textarea>'
+									str += '<input type="button" id="cancle${list.reply_id}" class="btn-sm btn-primary pull-right" style="margin:5px;" value="취소">'
+									str += '<input type="button" id="insert${list.reply_id}" class="btn=sm btn-primary pull-right" style="margin:5px;" value="등록">'
+									$('#${list.reply_id}').append(str)
+									$('#text${list.reply_id}').val($('#content${list.reply_id}').text())
+									$('#update${list.reply_id}').hide()
+								} else {
+									alert('작성자가 아닙니다')
+								}
+							})
+							.on('click','#delete${list.reply_id}',function(){
+								if('${loginid}' =='${list.writer}') {
+									$.post("http://localhost:8080/app/deleteReply",{reply_id:${list.reply_id}, content:$('#text${list.reply_id}').val()},function(result){
+										console.log(result)	
+							 		},'json')
+								} else {
+									alert('작성자가 아닙니다')
+								}
+							})
+							
+							.on('click','#insert${list.reply_id}',function(){	
+								$.post("http://localhost:8080/app/updateReply",{reply_id:${list.reply_id},content:$('#text${list.reply_id}').val()},function(result){
+						 			console.log(result)			
+						 			
+						 		},'json')
+						 		
+						 		location.reload(); 
+							
+							})
+							.on('click','#cancle${list.reply_id}',function(){
+								$('#text${list.reply_id}').remove();
+								$('#insert${list.reply_id}').remove();
+								$('#cancle${list.reply_id}').remove();
+								str='<input type="button" id="update${list.reply_id}" class="btn-sm btn-link" value=수정>'
+								$('#update${list.reply_id}').show();
+							})
+							
+						</script>
+						<%
+							}				
+						%>
+					</c:forEach>
+				
+				</tbody>
+			</table> 
 			</div>
 	</div>
-<script src='https://code.jquery.com/jquery-3.5.0.js'></script>
+	
+
 <script>
 	$(document)
-	/* .ready(function() {
-		$.post("http://localhost:8081/app/getBoardView",{bbs_id:${bbs_id}},function(result){
- 			console.log(result)
- 			$.each(result,function(ndx,value){
- 				$('#title').text(value['title']);
- 				$('#writer').text(value['writer']);
- 				$('#content').text(value['content']);
- 				$('#created').text(value['created']);
- 				
- 				
- 			}) 
- 			
- 		},'json')
-	}) */
+
 	.on('click','#update',function() {
 		if('${loginid}' =='${board.writer}') {
-			location.href='/app/update?bbs_id='+${board.bbs_id}
+			location.href='/app/update?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
 		} else {
 			alert('작성자가 아닙니다')
-			return false
-		}
-		
-	})
-	.on('click','#delete',function() {
-		if('${loginid}'=='${board.writer}'){
-			$.post("http://localhost:8081/app/doDelete",{bbs_id:${board.bbs_id}},function(result){
-	 			console.log(result)			
-	 			
-	 		},'json')
-			location.href='/app'
-		} else {
-			alert('작성자가 아닙니다')
+			
 		}
 		
 	})
 	
-
+	.on('click','#delete',function() {
+		if('${loginid}'=='${board.writer}'){
+			$.post("http://localhost:8080/app/doDelete",{bbs_id:${board.bbs_id}},function(result){
+	 			console.log(result)			
+	 			
+	 		},'json')
+	 		location.href='/app?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+		} else {
+			alert('작성자가 아닙니다') 
+		}	
+	}) 
+	
+	 
+	.on('click','#doReply',function() {
+		let s = $('textarea[name=content]').val()
+		if(s=='') {
+			alert('내용을 입력해주세요')
+			
+		}
+		$.post("http://localhost:8080/app/insertReply",{bbs_id:${board.bbs_id},content:s},function(result){
+ 			console.log(result)			
+ 			
+ 		},'json')
+ 		location.reload();
+	})
 </script>
+
+
 </body>
 </html>

@@ -3,6 +3,7 @@ package com.human.app;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,10 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+
 
 /**
  * Handles requests for the application home page.
@@ -35,30 +39,19 @@ public class HomeController {
 	 * Simply selects the home view to render by returning its name.
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Paging vo, Model model, HttpServletRequest hsr
-			, @RequestParam(value="nowPage", required=false)String nowPage
-			, @RequestParam(value="cntPerPage", required=false)String cntPerPage
-			, @RequestParam(value="search_type",required = false) String search_type
-			, @RequestParam(value="search_keyword",required = false) String search_keyword) {
-			Board board = sqlSession.getMapper(Board.class);
+	public String home(@ModelAttribute("paging") Paging paging, Model model) {
 			
-			
-
-			int total = board.countBoard(vo);
-			
-			System.out.println(total);
-			if (nowPage == null && cntPerPage == null) {
-			nowPage = "1";
-			cntPerPage = "5";
-		} else if (nowPage == null) {
-			nowPage = "1";
-		} else if (cntPerPage == null) { 
-			cntPerPage = "5";
+		if(paging.getPage() == null) {
+			paging.setPage(1);
 		}
-		vo = new Paging(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage),search_type,search_keyword);
-		model.addAttribute("paging", vo);
-		model.addAttribute("viewAll", board.selectBoard(vo));
-		System.out.println(vo.getSearch_keyword());
+		Board board = sqlSession.getMapper(Board.class);
+		//pageVO의 2개변수값을 필수로 입력해야지만 페이징처리가 가능
+		paging.setQueryPerPageNum(10);
+		paging.setPerPageNum(5);
+		int totalCount = board.countBoard(paging);
+		paging.setTotalCount(totalCount);//여기에서 startPage,endPage,prev,next변수값이 발생됨
+		ArrayList<Boardinfo> boardList = board.selectBoard(paging);
+		model.addAttribute("boardList", boardList);
 
 		
 		
@@ -66,25 +59,61 @@ public class HomeController {
 	}
 
 	@RequestMapping(value = "/view", method = RequestMethod.GET)
-	public String view(@RequestParam("bbs_id") int bbs_id,HttpServletRequest hsr,Model model) {
-		//model.addAttribute("bbs_id", bbs_id);
+	public String view(@RequestParam("bbs_id") int bbs_id,HttpServletRequest hsr,Model model
+			, @RequestParam(value="page", required=false)String page
+			
+			, @RequestParam(value="search_type",required = false) String search_type
+			, @RequestParam(value="search_keyword",required = false) String search_keyword
+			) {
+		model.addAttribute("bbs_id", bbs_id);
+		Reply reply =sqlSession.getMapper(Reply.class);
+		ArrayList<Replyinfo> replyList = reply.getReplyList(bbs_id);
+		model.addAttribute("replyList", replyList);
 		Board board = sqlSession.getMapper(Board.class);
 		Boardinfo boardinfo = board.getBoardView(bbs_id);
 		model.addAttribute("board", boardinfo);
+		model.addAttribute("page", page);
+		model.addAttribute("search_type", search_type);
+		model.addAttribute("search_keyword", search_keyword);
 		return "view";
 	}
 	@RequestMapping(value = "write", method = RequestMethod.GET)
-	public String write() {
+	public String write(HttpServletRequest hsr, Model model
+			, @RequestParam(value="page", required=false)String page
+			, @RequestParam(value="search_type",required = false) String search_type
+			, @RequestParam(value="search_keyword",required = false) String search_keyword
+			) {
+		session = hsr.getSession();
 		
-		
+		model.addAttribute("page", page);
+		model.addAttribute("search_type", search_type);
+		model.addAttribute("search_keyword", search_keyword);
+		String loginid = (String)session.getAttribute("loginid");
+		if(loginid==null) {
+			return "redirect:/";
+		}
 		return "write";
 	}
 	@RequestMapping(value = "update", method = RequestMethod.GET)
-	public String update(@RequestParam("bbs_id") int bbs_id,Model model) {
-		//model.addAttribute("bbs_id", bbs_id);
+	public String update(@RequestParam("bbs_id") int bbs_id, HttpServletRequest hsr
+			, Model model
+			, @RequestParam(value="page", required=false)String page
+			, @RequestParam(value="search_type",required = false) String search_type
+			, @RequestParam(value="search_keyword",required = false) String search_keyword
+			) {
+		
+		model.addAttribute("bbs_id", bbs_id);
+		model.addAttribute("page", page);
+		model.addAttribute("search_type", search_type);
+		model.addAttribute("search_keyword", search_keyword);
 		Board board = sqlSession.getMapper(Board.class);
 		Boardinfo boardinfo = board.getBoardView(bbs_id);
 		model.addAttribute("board", boardinfo);
+		session = hsr.getSession();
+		String loginid = (String)session.getAttribute("loginid");
+		if(loginid==null) {
+			return "redirect:/";
+		}
 		return "update";
 	}
 	@RequestMapping(value = "newbie", method = RequestMethod.GET)
@@ -97,15 +126,15 @@ public class HomeController {
 	public String logout(HttpServletRequest hsr) {
 		session = hsr.getSession();
 		session.invalidate();
-		
-		return "redirect:/";
+		String referer = hsr.getHeader("Referer");
+		hsr.getSession().setAttribute("redirectURI", referer);
+		return "redirect:"+referer;
 	}
 	@RequestMapping(value = "login", method = RequestMethod.GET)
 	public String login(HttpServletRequest hsr) {
 		session = hsr.getSession();
 		session.invalidate();
 		String referer = hsr.getHeader("Referer");
-		System.out.println(referer);
 		hsr.getSession().setAttribute("redirectURI", referer);
 		
 		return "login";
@@ -162,8 +191,6 @@ public class HomeController {
 			System.out.println(referer);
 			return "redirect:"+referer;
 		}
-		session = hsr.getSession();
-		session.setAttribute("nonmember", "���̵�� ��й�ȣ�� Ȯ�����ּ���.");
 		return "login";
 	}
 	@RequestMapping(value="/signin", method=RequestMethod.POST)
@@ -185,7 +212,7 @@ public class HomeController {
 		String title = hsr.getParameter("title");
 		Board board = sqlSession.getMapper(Board.class);
 		board.doWrite(title,content,name);
-		return "home";
+		return "redirect:/";
 	}
 	@RequestMapping(value="/doUpdate", method=RequestMethod.POST)
 	public  String doUpdate(HttpServletRequest hsr) {
@@ -203,6 +230,37 @@ public class HomeController {
 		Board board = sqlSession.getMapper(Board.class);
 		board.doDelete(bbs_id);
 		return "home";
+	}
+	@RequestMapping(value="/insertReply", method=RequestMethod.POST,
+			produces = "application/text; charset=utf8")
+	@ResponseBody
+	public  String insertReply(HttpServletRequest hsr) {
+		int bbs_id = Integer.parseInt(hsr.getParameter("bbs_id"));
+		String writer = (String)session.getAttribute("loginid");		
+		String content = hsr.getParameter("content");
+		Reply reply = sqlSession.getMapper(Reply.class);
+		reply.insertReply(bbs_id, writer, content);
+		return "ok";
+	}
+	@RequestMapping(value="/updateReply", method=RequestMethod.POST,
+			produces = "application/text; charset=utf8")
+	@ResponseBody
+	public  String updateReply(HttpServletRequest hsr) {
+		int reply_id = Integer.parseInt(hsr.getParameter("reply_id"));		
+		String content = hsr.getParameter("content");
+		Reply reply = sqlSession.getMapper(Reply.class);
+		reply.updateReply(reply_id, content);
+		return "ok";
+	}
+	@RequestMapping(value="/deleteReply", method=RequestMethod.POST,
+			produces = "application/text; charset=utf8")
+	@ResponseBody
+	public  String deleteReply(HttpServletRequest hsr) {
+		int reply_id = Integer.parseInt(hsr.getParameter("reply_id"));		
+		
+		Reply reply = sqlSession.getMapper(Reply.class);
+		reply.deleteReply(reply_id);
+		return "ok";
 	}
 /*iRoom room = sqlSession.getMapper(iRoom.class);
 String checkin = hsr.getParameter("checkin");

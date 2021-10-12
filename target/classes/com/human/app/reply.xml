@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.human.app.Reply">
+	<select id="getReplyList" resultType="com.human.app.Replyinfo">
+		select a.reply_id,a.content,a.writer,a.created,a.updated from reply a,bbs b where a.bbs_id=b.bbs_id and b.bbs_id=#{param1} order by reply_id desc
+	</select>
+	<insert id="insertReply">
+		insert into reply values(seq_reply_id.nextval,#{param1} ,#{param2} ,#{param3} ,to_char(systimestamp,'YYYY-MM-DD HH24:MI:SS'),to_char(systimestamp,'YYYY-MM-DD HH24:MI:SS'))
+	</insert>
+	<update id="updateReply">
+		update reply set content=#{param2}, updated=to_char(systimestamp,'YYYY-MM-DD HH24:MI:SS') where reply_id= #{param1}
+	</update>
+	<delete id="deleteReply">
+		delete reply where reply_id=#{param1}
+	</delete>
+</mapper>

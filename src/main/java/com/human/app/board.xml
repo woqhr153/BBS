@@ -10,7 +10,7 @@
 		insert into bbs(bbs_id,title,content,writer,created,updated) values(seq_bbs_id.nextval,#{param1},#{param2},#{param3},to_char(sysdate,'YYYY-MM-DD'),to_char(sysdate,'YYYY-MM-DD'))
 	</insert>
 	<update id="doUpdate">
-		update bbs set title=#{param2} , content=#{param3} where bbs_id=#{param1}
+		update bbs set title=#{param2} , content=#{param3}, updated=to_char(sysdate,'YYYY-MM-DD') where bbs_id=#{param1}
 	</update>
 	<delete id="doDelete">
 		delete bbs where bbs_id=#{param1}
@@ -22,17 +22,18 @@
 
 <!-- 페이징 처리 후 게시글 조회 -->
 <select id="selectBoard" resultType="com.human.app.Boardinfo">
-	SELECT * 
-		FROM (
-			SELECT ROWNUM RN, A.* 
-				FROM (
-						SELECT * 
-						FROM BBS
-						<include refid="sqlWhere" />
-						ORDER BY BBS_ID DESC
-						) A
-				)
-	WHERE RN BETWEEN #{start} AND #{end}
+	select table_b.* from
+(
+	select rownum as rnum, table_a.* from 
+	(
+		select * from bbs
+		<include refid="sqlWhere" />
+		order by bbs_id desc
+	) table_a
+	<![CDATA[
+	where rownum <= #{queryStartNo}+#{queryPerPageNum}
+) table_b where table_b.rnum > #{queryStartNo}
+	]]>
 </select>
 
  <sql id="sqlWhere">
