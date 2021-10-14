@@ -79,7 +79,7 @@
 					
 				</tbody>
 			</table>			
-			<a href="/app?page=${page}&search_type=${search_type}&search_keyword=${search_keyword}" class="btn btn-primary pull-right" >목록</a>
+			<input type="button" id="cancle" class="btn btn-primary pull-right" value="취소">
 			<input type="button" id="write" class="btn btn-primary pull-right" value="등록" style="margin-right:10px">			
 		</div>
 	</div>
@@ -100,7 +100,16 @@
 				alert('내용을 입력해주세요')
 				return false
 			}
-			$('form').submit()
+			conf = confirm('게시물을 등록하시겠습니까?')
+				if(conf==true){
+					$('form').submit()
+				}
+		})
+		.on('click','#cancle',function() {
+			conf = confirm('게시물 등록을 취소하시겠습니까?')
+			if(conf==true){
+				location.href='/app?page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+			}
 		})
 	</script>
 </body>

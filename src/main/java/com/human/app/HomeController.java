@@ -117,8 +117,10 @@ public class HomeController {
 		return "update";
 	}
 	@RequestMapping(value = "newbie", method = RequestMethod.GET)
-	public String newbie() {
-		
+	public String newbie(HttpServletRequest hsr) {
+		session = hsr.getSession();
+		String referer = hsr.getHeader("Referer");
+		hsr.getSession().setAttribute("redirectURI", referer);
 		
 		return "newbie";
 	}
@@ -188,7 +190,6 @@ public class HomeController {
 			session.setAttribute("loginid", user_id);
 			
 			String referer = (String)session.getAttribute("redirectURI");
-			System.out.println(referer);
 			return "redirect:"+referer;
 		}
 		return "login";
@@ -201,7 +202,8 @@ public class HomeController {
 		String mobile = hsr.getParameter("tel");
 		Member member = sqlSession.getMapper(Member.class);
 		member.doSignin(name, loginid, passcode ,mobile);	
-		return "home";
+		String referer = (String)session.getAttribute("redirectURI");
+		return "redirect:"+referer;
 	}
 	
 	@RequestMapping(value="/doWrite", method=RequestMethod.POST)

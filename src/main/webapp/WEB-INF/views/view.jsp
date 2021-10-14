@@ -109,7 +109,7 @@
 				<%
 					} else {
 				%>
-					<textarea style="margin-top:100px;" class="form-control"rows="5" cols="20" wrap="hard" placeholder="댓글을 작성하시려면 로그인하세요" disabled></textarea>
+					<textarea style="margin-top:100px;" class="form-control"rows="5" cols="20" wrap="hard" placeholder="댓글을 작성하시려면 로그인하세요"></textarea>
 				<%
 					} 
 				%>
@@ -153,7 +153,7 @@
 								if('${loginid}' =='${list.writer}') {
 									str = '<textarea id="text${list.reply_id}" class="form-control" rows="5" cols="20" placeholder="내용을 입력해주세요"></textarea>'
 									str += '<input type="button" id="cancle${list.reply_id}" class="btn-sm btn-primary pull-right" style="margin:5px;" value="취소">'
-									str += '<input type="button" id="insert${list.reply_id}" class="btn=sm btn-primary pull-right" style="margin:5px;" value="등록">'
+									str += '<input type="button" id="insert${list.reply_id}" class="btn-sm btn-primary pull-right" style="margin:5px;" value="수정">'
 									$('#${list.reply_id}').append(str)
 									$('#text${list.reply_id}').val($('#content${list.reply_id}').text())
 									$('#update${list.reply_id}').hide()
@@ -162,30 +162,40 @@
 								}
 							})
 							.on('click','#delete${list.reply_id}',function(){
+								reply_id = ${list.reply_id}
 								if('${loginid}' =='${list.writer}') {
-									$.post("http://localhost:8080/app/deleteReply",{reply_id:${list.reply_id}, content:$('#text${list.reply_id}').val()},function(result){
-										console.log(result)	
-							 		},'json')
+									conf = confirm('댓글을 삭제하시겠습니까?')
+									if(conf==true){
+										$.post("http://localhost:8080/app/deleteReply",{reply_id:reply_id, content:$('#text${list.reply_id}').val()},function(result){
+											console.log(result)	
+								 		},'json')
+								 		location.reload(); 
+									}
 								} else {
 									alert('작성자가 아닙니다')
 								}
 							})
 							
-							.on('click','#insert${list.reply_id}',function(){	
-								$.post("http://localhost:8080/app/updateReply",{reply_id:${list.reply_id},content:$('#text${list.reply_id}').val()},function(result){
-						 			console.log(result)			
-						 			
-						 		},'json')
-						 		
-						 		location.reload(); 
 							
+							.on('click','#insert${list.reply_id}',function(){	
+								reply_id = ${list.reply_id}
+								conf = confirm('댓글을 수정하시겠습니까?')
+								if(conf==true){
+									$.post("http://localhost:8080/app/updateReply",{reply_id:reply_id,content:$('#text${list.reply_id}').val()},function(result){
+							 			console.log(result)						 			
+							 		},'json')						 		
+							 		location.reload(); 
+								}
 							})
 							.on('click','#cancle${list.reply_id}',function(){
-								$('#text${list.reply_id}').remove();
-								$('#insert${list.reply_id}').remove();
-								$('#cancle${list.reply_id}').remove();
-								str='<input type="button" id="update${list.reply_id}" class="btn-sm btn-link" value=수정>'
-								$('#update${list.reply_id}').show();
+								conf = confirm('댓글 수정을 취소하시겠습니까?')
+								if(conf==true){
+									$('#text${list.reply_id}').remove();
+									$('#insert${list.reply_id}').remove();
+									$('#cancle${list.reply_id}').remove();
+									str='<input type="button" id="update${list.reply_id}" class="btn-sm btn-link" value=수정>'
+									$('#update${list.reply_id}').show();
+								}
 							})
 							
 						</script>
@@ -215,28 +225,35 @@
 	
 	.on('click','#delete',function() {
 		if('${loginid}'=='${board.writer}'){
-			$.post("http://localhost:8080/app/doDelete",{bbs_id:${board.bbs_id}},function(result){
-	 			console.log(result)			
-	 			
-	 		},'json')
-	 		location.href='/app?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+			conf = confirm('게시물을 삭제하시겠습니까?')
+			if(conf==true){
+				bbs_id = ${board.bbs_id}
+				$.post("http://localhost:8080/app/doDelete",{bbs_id:bbs_id},function(result){
+		 			console.log(result)			
+		 			
+		 		},'json')
+		 		location.href='/app?bbs_id='+bbs_id+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+			}			
 		} else {
-			alert('작성자가 아닙니다') 
-		}	
-	}) 
+			alert('작성자가 아닙니다');
+		}
+	})
+	
 	
 	 
 	.on('click','#doReply',function() {
-		let s = $('textarea[name=content]').val()
-		if(s=='') {
-			alert('내용을 입력해주세요')
-			
+		conf = confirm('댓글을 등록하시겠습니까?')
+		if(conf==true){
+			bbs_id = ${board.bbs_id}
+			let s = $('textarea[name=content]').val()
+			if(s=='') {
+				alert('내용을 입력해주세요')		
+			}
+			$.post("http://localhost:8080/app/insertReply",{bbs_id:bbs_id,content:s},function(result){
+	 			console.log(result)				 			
+	 		},'json')
+	 		location.reload();
 		}
-		$.post("http://localhost:8080/app/insertReply",{bbs_id:${board.bbs_id},content:s},function(result){
- 			console.log(result)			
- 			
- 		},'json')
- 		location.reload();
 	})
 </script>
 

@@ -89,8 +89,11 @@
 		$(document)
 
 		.on('click','#cancle',function() {
-			location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
-		})
+			conf = confirm('게시물 수정을 취소하시겠습니까?')
+			if(conf==true){
+				location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+			}
+			})
 		.on('click','#update',function() {
 			let pstr= $.trim($('#title').val())
 			$('#title').val(pstr)
@@ -105,12 +108,17 @@
 				alert('내용을 입력해주세요')
 				return false
 			}
-			$.post("http://localhost:8080/app/doUpdate",{bbs_id:${board.bbs_id},title:$('#title').val(),content:$('#content').val()},function(result){
-	 			console.log(result)
-	 			
-	 			},'json')
-	 			location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
-			})
+			conf = confirm('게시물을 수정하시겠습니까?')
+			if(conf==true){
+				bbs_id = ${board.bbs_id}
+				$.post("http://localhost:8080/app/doUpdate",{bbs_id:bbs_id,title:$('#title').val(),content:$('#content').val()},function(result){
+		 			console.log(result)
+		 			
+		 			},'json')
+		 		location.href='/app/view?bbs_id='+${board.bbs_id}+'&page=${page}&search_type=${search_type}&search_keyword=${search_keyword}'
+			}
+			
+		})
 		
 	</script>
 </body>

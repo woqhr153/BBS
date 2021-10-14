@@ -91,7 +91,7 @@
 				<c:forEach items="${boardList}" var="list">
 				<tr>
 					<td>${list.bbs_id}</td>
-					<td>${list.title}</td>
+					<td><div  style="width:700px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${list.title}</div></td>
 					<td>${list.writer}</td>
 					<td>${list.created}</td>
 					<td>${list.updated}</td>
@@ -128,7 +128,7 @@
 		</div>
 		<%
           	if(session.getAttribute("loginid") !=null) {%>
-          		<a href="/app/write?page=${paging.page}&search_type=${paging.search_type}&search_keyword=${paging.search_keyword}" class="btn btn-primary pull-right">글쓰기</a>
+          		<a href="/app/write?page=${paging.page}&search_type=${paging.search_type}&search_keyword=${paging.search_keyword}" class="btn btn-primary pull-right" style="margin-bottom:30px">글쓰기</a>
 	        <%
 	          	} 
 	        %>
