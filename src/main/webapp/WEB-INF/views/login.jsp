@@ -15,23 +15,49 @@
 <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 </head>
+<style>
+	@media all and (min-width : 801px) {
+		#head{
+		margin-top:10px !important
+		}
+	}
+	@media all and (min-width : 1066px) {
+		#head{
+		margin-top:10px !important
+		}
+	}
+</style>
 <body>
-	<nav class="navbar navbar-inverse navbar-fixed-top">
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+         <div class="navbar-header">
+          <button type="button" id="navbar-toggle" class="navbar-toggle collapsed" data-toggle="dropdown" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <%
+          	if(session.getAttribute("loginid") ==null) {%>
+          		<a href="/app/login" class="btn btn-success">로그인</a>
+            	<a href="/app/newbie" class="btn btn-primary">회원가입</a>
+          <%
+          	} else{
+          %>	
+          	<div style="color:white">
+          		${loginid}님 환영합니다 
+          		<a href="/app/logout" class="btn btn-primary " style="margin-left:10px">로그아웃</a>
+          	</div>
+			
+			<%
+			} 
+			%>
+            
           </button>
+         
           <a class="navbar-brand" href="/app">Home</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <div class="navbar-form navbar-right">
           <%
           	if(session.getAttribute("loginid") ==null) {%>
-          		<a class="btn btn-success">로그인</a>
+          		<a href="/app/login" class="btn btn-success">로그인</a>
             	<a href="/app/newbie" class="btn btn-primary">회원가입</a>
           <%
           	} else{
@@ -53,7 +79,7 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
-        <h1>Hello, world!</h1>
+        <h1 id="head" style="margin-top:50px;">Hello, world!</h1>
         </div>
     </div>
 	<div class="container">
